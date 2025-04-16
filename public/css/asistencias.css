@@ -1,0 +1,267 @@
+
+
+
+html,
+body {
+    overflow-y: hidden;
+    overflow-x: hidden;
+    height: 90% !important;
+    margin: 15px !important;
+
+}
+
+
+
+
+
+.imgAsistencia {
+    margin-left: 80px;
+    width: 235px;
+    border-radius: 10px;
+    border: 1px solid #404040;
+}
+
+
+.clave {
+    box-shadow: 1px 1px 2px 1px #e8e8e8;
+    background-image: linear-gradient(90deg, red, red, red);
+    text-decoration: none;
+    cursor: pointer;
+    background-repeat: no-repeat;
+    background-size: 0% 2px;
+    background-position: left bottom;
+    letter-spacing: 10px;
+    /* transition: background-size 430ms ease-in-out; */
+}
+
+.clave:hover {
+    background-size: 100% 2px;
+}
+
+
+
+.box {
+    position: relative;
+    width: 100%;
+    height: 270px;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.box::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 100%;
+    height: 90rem;
+    background: linear-gradient(0deg, transparent, transparent, #45f3ff, #45f3ff, #45f3ff);
+    z-index: 1;
+    transform-origin: bottom right;
+    animation: animate 8s linear infinite;
+}
+
+.box::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 100%;
+    height: 90rem;
+    background: linear-gradient(0deg, transparent, transparent, #45f3ff, #45f3ff, #45f3ff);
+    z-index: 1;
+    transform-origin: bottom right;
+    animation: animate 8s linear infinite;
+    animation-delay: -3s;
+}
+
+.borderLine {
+    position: absolute;
+    top: 0;
+    inset: 0;
+
+}
+
+.borderLine::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 100%;
+    height: 90rem;
+    background: linear-gradient(0deg, transparent, transparent, #ff2770, #ff2770, #ff2770);
+    z-index: 1;
+    transform-origin: bottom right;
+    animation: animate 8s linear infinite;
+    animation-delay: -1.5s;
+}
+
+.borderLine::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 100%;
+    height: 90rem;
+    background: linear-gradient(0deg, transparent, transparent, #ff2770, #ff2770, #ff2770);
+    z-index: 1;
+    transform-origin: bottom right;
+    animation: animate 8s linear infinite;
+    animation-delay: -4.5s;
+}
+
+@keyframes animate {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.box form {
+    position: absolute;
+    /* inset: 4px; */
+    top: 4px;
+    right: 4px;
+    bottom: 4px;
+    left: 4px;
+    background: #23242a;
+    /* background-image: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); */
+    padding: 10px 20px;
+    border-radius: 8px;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+}
+
+.box form input[type="submit"] {
+    margin-top: 30px;
+    border: none;
+    outline: none;
+    background: green;
+    cursor: pointer;
+    font-size: 0.9rem;
+    border-radius: 4px;
+    font-weight: 600;
+
+}
+
+.box form input[type="submit"]:active {
+    opacity: 0.8;
+}
+
+.resaltado {
+    background-color: #f31f08e6;
+}
+
+.claves {
+    margin: 0;
+    padding: 0;
+    width: 120px;
+    display: flexbox;
+    justify-content: center;
+}
+
+
+.neon {
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    font-weight: bold;
+    letter-spacing: 2px;
+    color: #fff;
+
+}
+
+
+
+.btnAsistencia {
+    position: relative;
+    display: inline-block;
+    padding: 5px 3px;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    color: #03e9f4;
+    font-size: 1.2rem;
+    font-weight: bold;
+    transition: .5s;
+    overflow: hidden;
+    margin-right: 70px;
+}
+
+.btnAsistencia:hover {
+    cursor: pointer;
+    background: #f4f003;
+    color: #050801;
+    -webkit-box-reflect: below 1px linear-gradient(transparent, #0005);
+}
+
+.asistencias {
+
+    background-image: url(../img/fondo.jpg);
+    backdrop-filter: blur(2px);
+    background-size: 100%; 
+    background-image: no-repeat;
+}
+
+#TablaAsistencia{
+    background: #f8f9f940;
+}
+
+table {
+    font-family: Arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+    border: 2px solid #3498db;
+    border-radius: 10px;
+    box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Encabezados de columna */
+th {
+    background-color: #3498db;
+    color: #ffffff;
+    font-weight: bold;
+    /* font-size: 22px; */
+    text-align: left;
+    /* padding: 10px; */
+}
+
+
+/* Filas pares */
+tr:nth-child(even) {
+    background-color: #3498db;
+}
+
+/* Filas impares */
+tr:nth-child(odd) {
+    background-color: #3498db;
+}
+
+/* Celdas de datos */
+td {
+    /* padding: 8px; */
+    text-align: left;
+    color: #ffffff;
+    font-size: 22px;
+    font-weight: bold;
+}
+
+/* Estilo para el hover de las filas */
+tr:hover {
+    background-color: #69b8ed;
+    color: #ffffff;
+    transition: background-color 0.3s;
+}
+
+/* Estilo para la clase activa (puedes agregar esta clase a la fila seleccionada) */
+tr.active {
+    background-color: #ff6b6b;
+    color: #ffffff;
+}
+
+/* Agrega un borde alrededor de la tabla */
+table-bordered {
+    border: 1px solid #3498db;
+}
