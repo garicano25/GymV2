@@ -1,7 +1,3 @@
-var http = 'http://'
-var servidor = 'localhost'
-var appname = 'gym'
-
 var fechaOriginal = new Date()
 const fechaActual = formatearFecha(fechaOriginal);
 // var fechaActualFormatoInput = fechaOriginal.toISOString().slice(0, 10);
@@ -54,9 +50,9 @@ function convertirCadenaAFecha(fechaTexto) {
         return null; // Si no es un formato válido, devolver null
     }
 
-    const dia = parseInt(partesFecha[0], 10);
+    const dia = parseInt(partesFecha[2], 10);
     const mes = parseInt(partesFecha[1], 10);
-    const año = parseInt(partesFecha[2], 10);
+    const año = parseInt(partesFecha[0], 10);
 
     if (isNaN(dia) || isNaN(mes) || isNaN(año)) {
         // Asegurarse de que las partes sean números válidos
@@ -86,25 +82,6 @@ function formatearFecha(fecha) {
 }
 
 
-function configAjaxAwait(config) {
-
-    const defaults = {
-        alertBefore: false,
-        response: true,
-        callbackBefore: false,
-        callbackAfter: false,
-        returnData: true,
-        WithoutResponseData: false,
-        resetForm: false,
-        ajaxComplete: () => { },
-        ajaxError: () => { },
-    }
-
-    Object.entries(defaults).forEach(([key, value]) => {
-        config[key] = config[key] ?? value;
-    });
-    return config;
-}
 
 if (window.innerWidth <= 768) {
     position = 'top';
@@ -124,64 +101,6 @@ const Toast = Swal.mixin({
     }
 });
 
-async function ajax(dataJson, apiURL,
-    config = {
-        alertBefore: false
-    },
-    //Callback
-    callbackBefore = function (data) {
-        alertMsj({
-            title: 'Espera un momento...',
-            text: 'Estamos cargando tu solicitud, esto puede demorar un rato',
-            icon: 'info',
-            showCancelButton: false
-        })
-    },
-
-    callbackSuccess = function (data) {
-        // console.log('callback ajaxAwait por defecto')
-    }
-) {
-    return new Promise(function (resolve, reject) {
-        //Configura la funcion misma
-        config = configAjaxAwait(config)
-
-
-        $.ajax({
-            url: `${http}${servidor}/${appname}/api/${apiURL}.php`,
-            data: dataJson,
-            dataType: 'json',
-            type: 'POST',
-            beforeSend: function () {
-                config.callbackBefore ? callbackBefore() : 1;
-            },
-            success: function (data) {
-                let row = data;
-                try {
-                    if (config.response) {
-                        if (mensajeAjax(row)) {
-                            config.callbackAfter ? callbackSuccess(config.WithoutResponseData ? row.response.data : row) : 1;
-                            config.returnData ? resolve(config.WithoutResponseData ? row.response.data : row) : resolve(1)
-                        }
-                    } else {
-                        config.callbackAfter ? callbackSuccess(config.WithoutResponseData ? row.response.data : row) : 1;
-                        config.returnData ? resolve(config.WithoutResponseData ? row.response.data : row) : resolve(1)
-                    }
-                } catch (error) {
-                    alertMensaje('error', 'Error', 'Datos/Configuración erronea', error);
-                    console.error(error);
-                }
-
-            },
-            error: function (jqXHR, exception, data) {
-                alertErrorAJAX(jqXHR, exception, data)
-                // console.log('Error')
-            },
-        })
-    });
-}
-
-
 
 
 function alertMensaje(icon = 'success', title = '¡Completado!', text = 'Datos completados', footer = null, html = null, timer = null) {
@@ -196,155 +115,6 @@ function alertMensaje(icon = 'success', title = '¡Completado!', text = 'Datos c
     })
 }
 
-function alertMsj(options, callback = function () { }) {
-
-    if (!options.hasOwnProperty('title'))
-        options['title'] = "¿Desea realizar esta acción?"
-
-    if (!options.hasOwnProperty('text'))
-        options['text'] = "Probablemente no podrá revertirlo"
-
-    if (!options.hasOwnProperty('icon'))
-        options['icon'] = 'warning'
-
-    if (!options.hasOwnProperty('showCancelButton'))
-        options['showCancelButton'] = true
-
-    if (!options.hasOwnProperty('confirmButtonColor'))
-        options['confirmButtonColor'] = '#3085d6'
-
-    if (!options.hasOwnProperty('cancelButtonColor'))
-        options['cancelButtonColor'] = '#d33'
-
-    if (!options.hasOwnProperty('confirmButtonText'))
-        options['confirmButtonText'] = 'Aceptar'
-
-    if (!options.hasOwnProperty('cancelButtonText'))
-        options['cancelButtonText'] = 'Cancelar'
-
-    if (!options.hasOwnProperty('allowOutsideClick'))
-        options['allowOutsideClick'] = false
-    // if (!options.hasOwnProperty('timer'))
-    //   options['timer'] = 4000
-    // if (!options.hasOwnProperty('timerProgressBar'))
-    //   options['timerProgressBar'] = true
-    //
-    Swal.fire(options).then((result) => {
-        callback(result);
-    })
-}
-
-
-function mensajeAjax(data, modulo = null) {
-    if (modulo != null) {
-        text = ' No pudimos cargar'
-    }
-
-    try {
-        switch (data['response']['code']) {
-            case 1:
-                return 1;
-                break;
-            case 2:
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Oops...',
-                    text: '¡Ha ocurrido un error!',
-                    footer: 'Respuesta: ' + data['response']['msj']
-                })
-                break;
-           
-            default:
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Oops...',
-                    text: 'Hubo un problema!',
-                    footer: 'No sabemos que pasó, reporta este problema...'
-                })
-        }
-    } catch (error) {
-        alertMensaje('warning', 'Error:', 'No se puedo resolver un conflicto interno con validación, si el problema persiste reporte al encargado de area de esto.', '[Error: api no valida, "response: {code: XXXX}", no existe]')
-        return 0
-    }
-    return 0;
-}
-
-
-function alertMensajeConfirm(options, callback = function () { }, set = 0, callbackDenied = function () { }, callbackCanceled = function () {
-
-}) {
-
-    //Options si existe
-    switch (set) {
-        case 1:
-            if (!options.hasOwnProperty('title'))
-                options['title'] = "¿Desea realizar esta acción?"
-
-            if (!options.hasOwnProperty('text'))
-                options['text'] = "Probablemente no podrá revertirlo"
-
-            if (!options.hasOwnProperty('icon'))
-                options['icon'] = 'warning'
-
-            if (!options.hasOwnProperty('showCancelButton'))
-                options['showCancelButton'] = true
-
-            if (!options.hasOwnProperty('confirmButtonColor'))
-                options['confirmButtonColor'] = '#3085d6'
-
-            if (!options.hasOwnProperty('cancelButtonColor'))
-                options['cancelButtonColor'] = '#d33'
-
-            if (!options.hasOwnProperty('confirmButtonText'))
-                options['confirmButtonText'] = 'Aceptar'
-
-            if (!options.hasOwnProperty('cancelButtonText'))
-                options['cancelButtonText'] = 'Cancelar'
-
-            if (!options.hasOwnProperty('allowOutsideClick'))
-                options['allowOutsideClick'] = false
-            // if (options.hasOwnProperty('timer'))
-            //   options['timer'] = 4000
-            // if (options.hasOwnProperty('timerProgressBar'))
-            //   options['timerProgressBar'] = true
-            //
-            break;
-        default:
-            if (!options) {
-                options = {
-                    title: "¿Desea realizar esta acción?",
-                    text: "Probablemente no podrá revertirlo",
-                    icon: "info",
-                    showCancelButton: true,
-                    confirmButtonColor: "#3085d6",
-                    cancelButtonColor: "#d33",
-                    confirmButtonText: "Aceptar",
-                    cancelButtonText: "Cancelar",
-                    // allowOutsideClick: false
-                    // timer: 4000,
-                    // timerProgressBar: true,
-                    //   showDenyButton: true,
-                    // denyButtonText: `Don't save`,
-                    // denyButtonColor: "#d33";
-                }
-            }
-            break;
-    }
-
-
-    Swal.fire(options).then((result) => {
-        if (result.isConfirmed || result.dismiss === "timer") {
-            callback()
-        } else if (result.isDenied) {
-            callbackDenied();
-        } else if (result.dismiss === Swal.DismissReason.cancel) {
-            callbackCanceled();
-        }
-    })
-}
-
-
-
 
 function alertSelectTable(msj = 'No ha seleccionado ningún registro', icon = 'error', timer = 2000) {
     Toast.fire({
@@ -353,30 +123,6 @@ function alertSelectTable(msj = 'No ha seleccionado ningún registro', icon = 'e
         timer: timer,
         // width: 'auto'
     });
-}
-
-function alertErrorAJAX(jqXHR, exception, data) {
-    var msg = '';
-    //Status AJAX
-    // console.log(jqXHR, exception, data)
-
-    switch (jqXHR.status) {
-        case 0:
-            if (exception != 'abort') {
-                alertToast('Sin conexión a internet', 'warning'); return 0
-            };
-        case 404: //console.log('Requested page not found. [404]'); return 0;
-        case 500: alertToast('Internal Server Error', 'info'); return 0;
-    }
-
-    switch (exception) {
-        case 'parsererror': alertMensaje('info', 'Error del servidor', 'Algo ha pasado, estamos trabajando para resolverlo', 'Mensaje de error: ' + data); return 0
-        case 'timeout': //console.log('timeout'); return 0
-        case 'abort': return 0
-    }
-
-    //console.log(jqXHR.responseText);
-
 }
 
 
@@ -399,89 +145,14 @@ function alertToast(msj = 'No ha seleccionado ningún registro', icon = 'error',
 }
 
 
-function mensajeAjax(data, modulo = null) {
-    if (modulo != null) {
-        text = ' No pudimos cargar'
-    }
-
-    try {
-        switch (data['response']['code']) {
-            case 1:
-                return 1;
-                break;
-            case 2:
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Oops...',
-                    text: '¡Ha ocurrido un error!',
-                    footer: 'Respuesta: ' + data['response']['msj']
-                })
-                break;
-            case "repetido":
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Oops...',
-                    text: '¡Usted ya está registrado!',
-                    footer: 'Utilice su CURP para registrarse en una nueva prueba'
-                })
-                break;
-            case "login":
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Oops...',
-                    text: 'Respuesta: ' + data['response']['msj']
-                })
-                break;
-            case "Token": case "Usernovalid":
-                alertMensajeConfirm({
-                    title: "¡Sesión no valida!",
-                    text: "El token de su sesión ha caducado, vuelva iniciar sesión",
-                    footer: "Redireccionando pantalla...",
-                    icon: "info",
-                    confirmButtonColor: "#d33",
-                    confirmButtonText: "Aceptar",
-                    cancelButtonText: false,
-                    allowOutsideClick: false,
-                    timer: 4000,
-                    timerProgressBar: true,
-                }, function () {
-                    destroySession();
-                    window.location.replace(http + servidor + "/" + appname + "/vista/login/");
-                })
-
-                break;
-            case "turnero":
-                alertMensajeConfirm({
-                    title: "Oops",
-                    text: `${data['response']['msj']}`,
-                    footer: "Tal vez deberias intentarlo nuevamente",
-                    icon: "warning",
-                })
-
-                break;
-            default:
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Oops...',
-                    text: 'Hubo un problema!',
-                    footer: 'No sabemos que pasó, reporta este problema...'
-                })
-        }
-    } catch (error) {
-        alertMensaje('warning', 'Error:', 'No se puedo resolver un conflicto interno con validación, si el problema persiste reporte al encargado de area de esto.', '[Error: api no valida, "response: {code: XXXX}", no existe]')
-        return 0
-    }
-    return 0;
-}
-
-
 function validarFormulario(form) {
     
     var formulario = form;
 
     // Busca todos los elementos input dentro del formulario y agrega la clase
-    formulario.find('input').addClass('validar');
-
+    formulario
+        .find("input[required], select[required], textarea[required]")
+        .addClass("validar");
 
     // Busca todos los elementos con la clase "validar"
     var campos = $('.validar');
@@ -539,3 +210,220 @@ function recuperarPagosSinConfirmar() {
 
     })
 }
+
+
+//================================================== Funciones de envio nuevo V2
+ function openModal(onlyIdModal, onlyIdForm) {
+    $("#" + onlyIdForm)[0].reset();
+    $("#" + onlyIdForm)
+        .find('input[type="hidden"][name="id"]')
+        .val(0);
+    $("#" + onlyIdModal).modal("show");
+}
+
+ function actionsAfterSuccess(
+    tabla,
+    onlyIdForm,
+    onlyIdModal,
+    onlyIdButton,
+    textAlert = "Registro Guardado con exito!"
+) {
+    tabla.ajax.reload();
+
+    $("#" + onlyIdForm)[0].reset();
+    $("#" + onlyIdModal).modal("hide");
+
+    // update button
+    $("#" + onlyIdButton).prop("disabled", false);
+
+    Swal.fire({
+        title: "Exito!",
+        text: textAlert,
+        icon: "success",
+        timer: 3500,
+        timerProgressBar: true,
+    });
+}
+
+ function toastEmptyFieldForm(params) {
+    Toast.fire({
+        icon: "error",
+        title: "Verifique que todos los campos tengan un valor!",
+    });
+}
+
+ function sendFormPostCreateorUpdate(
+    route,
+    onlyIdForm,
+    onlyIdButton,
+    api = 0
+) {
+    return new Promise((resolve, reject) => {
+        $.ajax({
+            dataType: "json",
+            type: "POST",
+            url: route,
+            data: $("#" + onlyIdForm).serialize() + "&api=" + api,
+            beforeSend: function () {
+                $("#" + onlyIdButton).prop("disabled", true);
+            },
+            success: function (response) {
+                $("#" + onlyIdButton).prop("disabled", false);
+
+                if (response.success === false) {
+                    reject(response.message);
+                } else {
+                    resolve(1);
+                }
+            },
+            error: function (xhr) {
+                $("#" + onlyIdButton).prop("disabled", false);
+
+                if (xhr.responseJSON) {
+                    reject(
+                        xhr.responseJSON.message ||
+                            "Ocurrió un error inesperado."
+                    );
+                } else {
+                    alert(
+                        "Error de conexión con el servidor. Intentelo mas tarde"
+                    );
+                }
+            },
+        });
+    });
+}
+
+ function sendFormPostDelete(route, api = 0, id = 0) {
+    return new Promise((resolve, reject) => {
+        $.ajax({
+            dataType: "json",
+            type: "POST",
+            url: route,
+            headers: {
+                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
+            },
+            data: {
+                id: id,
+                api: api,
+            },
+            success: function (response) {
+                if (response.success === false) {
+                    reject(response.message);
+                } else {
+                    resolve(1);
+                }
+            },
+            error: function () {
+                if (xhr.responseJSON) {
+                    reject(
+                        xhr.responseJSON.message ||
+                            "Ocurrió un error inesperado."
+                    );
+                } else {
+                    alert(
+                        "Error de conexión con el servidor. Intentelo mas tarde"
+                    );
+                }
+            },
+        });
+    });
+}
+
+
+ function editDatoTabla(
+     data,
+     form = "OnlyForm",
+     modalID = "ModalID",
+     formComplete = 0
+ ) {
+     //Limpiamos el form en donde vamos a insertar nuestros datos
+     $("#" + form).each(function () {
+         this.reset();
+     });
+
+     //La variable formComplete nos sirve para decir si es un formulario completo con select, radio, checkbox, textarea, y text, number
+     if (formComplete == 0) {
+         //Recorremos e insertamos los datos en los campos
+         for (var key in data) {
+             if (data.hasOwnProperty(key)) {
+                 if (
+                     !key.startsWith("btn") &&
+                     key !== "created_at" &&
+                     key !== "updated_at"
+                 ) {
+                     var input = $("#" + form).find(`input[name='${key}']`);
+                     if (input.length) {
+                         input.val(data[key]);
+                     } else {
+                         $("#" + form)
+                             .find(`textarea[name='${key}']`)
+                             .val(data[key]);
+                     }
+                 }
+             }
+         }
+
+         //Abrimos el modal
+         $("#" + modalID).modal("show");
+     } else {
+         //RECOREMOS EL FOMULARIO PRINCIPAL
+         for (var key in data) {
+             if (data.hasOwnProperty(key)) {
+                 if (
+                     !key.startsWith("BTN") &&
+                     key !== "created_at" &&
+                     key !== "updated_at"
+                 ) {
+                     var input = $("#" + form).find(
+                         `input[name='${key}'][type='text'], input[name='${key}'][type='number']`
+                     );
+                     var date = $("#" + form).find(
+                         `input[name='${key}'][type='date']`
+                     );
+                     var time = $("#" + form).find(
+                         `input[name='${key}'][type='time']`
+                     );
+                     var hidden = $("#" + form).find(
+                         `input[name='${key}'][type='hidden']`
+                     );
+                     var textarea = $("#" + form)
+                         .find(`textarea[name='${key}']`)
+                         .val(data[key]);
+                     var select = $("#" + form)
+                         .find(`select[name='${key}']`)
+                         .val(data[key]);
+
+                     if (input.length) {
+                         input.val(data[key]);
+                     } else if (textarea.length) {
+                         textarea.val(data[key]);
+                     } else if (select.length) {
+                         select.val(data[key]);
+                     } else if (date.length) {
+                         date.val(data[key]);
+                     } else if (time.length) {
+                         time.val(data[key]);
+                     } else if (hidden.length) {
+                         hidden.val(data[key]);
+                     } else {
+                         $("#" + form)
+                             .find(
+                                 `input[name='${key}'][value='${data[key]}'][type='radio']`
+                             )
+                             .prop("checked", true);
+
+                         $("#" + form)
+                             .find(
+                                 `input[name='${key}'][value='${data[key]}'][type='checkbox']`
+                             )
+                             .prop("checked", true);
+                     }
+                 }
+             }
+         }
+
+         //Abrimos el modal
+         $("#" + modalID).modal("show");
+     }
+ }
