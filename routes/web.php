@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\UserGymController;
+use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -13,11 +15,36 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/login', function () {return view('pages.auth.login'); });
-Route::get('/', function () {return view('pages.home.index'); });
-Route::get('/list-client', function () {return view('pages.cliente.list'); });
-Route::get('/create-client', function () {return view('pages.cliente.create'); });
-Route::get('/product', function () {return view('pages.producto.index'); });
-Route::get('/asistencia-pin', function () {return view('pages.asistencia.auth-pin'); });
-Route::get('/hub-ventas', function () {return view('pages.registroHub.ventas'); });
-Route::get('/hub-pagos', function () {return view('pages.registroHub.pagos'); });
+
+
+
+
+// ==================== Auth
+Route::get('/login', [AuthController::class, 'index'])->name('login');
+Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::post('/loginAuth', [AuthController::class, 'loginAuth'])->name('loginAuth');
+
+Route::middleware(['auth'])->group(function () {
+
+    // ===================== Home
+    Route::get('/', function () {return view('pages.home.index');})->name('home');
+
+
+    // ===================== Usuarios (Gym)
+    Route::get('/users', [UserGymController::class, 'index'])->name('users');
+    Route::get('/getUsers', [UserGymController::class, 'getUsers']);
+    Route::post('/register-user', [AuthController::class, 'register']);
+    Route::post('/user-active', [UserGymController::class, 'userActive']);
+    Route::post('/user-delete', [UserGymController::class, 'deleteUser']);
+
+
+
+    // =================== Aditional
+    Route::get('/list-client', function () {return view('pages.cliente.list'); });
+    Route::get('/create-client', function () {return view('pages.cliente.create'); });
+    Route::get('/product', function () {return view('pages.producto.index'); });
+    Route::get('/asistencia-pin', function () {return view('pages.asistencia.auth-pin'); });
+    Route::get('/hub-ventas', function () {return view('pages.registroHub.ventas'); });
+    Route::get('/hub-pagos', function () {return view('pages.registroHub.pagos'); });
+
+});

@@ -4,10 +4,9 @@ $("#formIniciarSesion").submit(function (event) {
     /*DATOS Y VALIDACION DEL REGISTRO*/
     var form = document.getElementById("formIniciarSesion");
     var formData = new FormData(form);
-    formData.set("api", 2);
     $.ajax({
         data: formData,
-        url: "../../gym/api/seguridad_api.php",
+        url: "/loginAuth",
         type: "POST",
         processData: false,
         contentType: false,
@@ -20,47 +19,36 @@ $("#formIniciarSesion").submit(function (event) {
         },
         dataType: "json",
         success: function (data) {
-            data = data["response"];
-            if (data["data"] == 1) {
-                Swal.fire({
-                    title: "Bienvenido",
-                    text: "Su registro ha sido exitoso",
-                    icon: "success",
-                    timer: 1500,
-                    timerProgressBar: true,
-                }).then(function () {
-                    window.location = "../index.php?vista=Home/index";
-                });
-            } else {
-                Swal.fire({
-                    icon: "error",
-                    title: "Error",
-                    text: data["msj"],
-                    timer: 3000,
-                    timerProgressBar: true,
-                });
+            Swal.fire({
+                title: "Exito!",
+                text: "Inicio de Sesion Exitoso!",
+                icon: "success",
+                timer: 1000,
+                timerProgressBar: true,
+            });
 
-                $(this).find("button :submit").prop("disabled", false);
-                if (data == "Oops! Tu contraseña es incorrecta.") {
-                    console.log("mal contra");
-                    $('#formIniciarSesion input[name="pass"]').css(
-                        "color",
-                        "red"
-                    );
-                } else {
-                    $('#formIniciarSesion input[name="user"]').css(
-                        "color",
-                        "red"
-                    );
+            // update button
+            $("#login").prop("disabled", false);
+
+            setTimeout(() => {
+                if (data.redirect) {
+                    window.location.href = data.redirect;
                 }
-            }
+            }, 1000);
         },
         error: function (jqXHR, exception, data) {
+
+            $("#login").prop("disabled", false);
+            $("#formIniciarSesion")[0].reset();
+            console.log(data)
             Swal.fire({
-                title: "Error!",
-                text: data,
+                title: "Error al Inicar Sesion!",
+                text: "Usuario o contraseña incorrectos",
                 icon: "error",
+                timer: 2500,
+                timerProgressBar: true,
             });
+            return false;
         },
     });
 });

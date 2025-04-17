@@ -26,12 +26,11 @@ class AuthController extends Controller
             // Validar los datos
             $request->validate([
                 'username' => ['required', 'string', 'max:255'],
-                'password' => ['required', 'string', 'min:3'],
-                'dirrecion' => ['nullable', 'string', 'min:3'],
+                'password' => ['nullable', 'string', 'min:3'],
+                'dirreccion' => ['nullable', 'string', 'min:3'],
                 'telefono' => ['nullable', 'string', 'min:3'],
                 'color_primario' => ['nullable', 'string', 'min:3'],
                 'color_secundario' => ['nullable', 'string', 'min:3'],
-                'pago_mensual' => ['nullable', 'float'],
                 'fecha_pago_inicio' => ['nullable', 'date'],
                 'fecha_pago_fin' => ['nullable', 'date'],
             ]);
@@ -46,7 +45,7 @@ class AuthController extends Controller
                     'username' => $request->username,
                     'password' => $password,
 
-                    'dirreccion' => $request->dirrecion,
+                    'dirreccion' => $request->dirreccion,
                     'telefono' => $request->telefono,
                     'color_primario' => $request->color_primario,
                     'color_secundario' => $request->color_secundario,
@@ -81,7 +80,7 @@ class AuthController extends Controller
             // Autenticar al usuario
             if (Auth::attempt(['username' => $request->username, 'password' => $request->password], $remember)) {
                 $user = Auth::user();
-                if ($user->status_id == 2) { // Inactivo
+                if ($user->status_id === 1) { // Activo
                     $request->session()->regenerate();
                     return response()->json(['redirect' => route('home')], 200);
                 } else {

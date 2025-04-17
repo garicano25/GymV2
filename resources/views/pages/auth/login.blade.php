@@ -1,10 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
     <title>GYM VAL-ROSS</title>
     <link href="{{ asset('css/login.css') }}" rel="stylesheet">
     <link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet">
@@ -16,16 +18,17 @@
         <span class="borderLine"></span>
 
         <form method="post" id="formIniciarSesion">
+            {{ csrf_field() }}
             <h2>Inicio de sesión</h2>
             <br>
             <!-- <img src="../include/img/letras.png" alt=""> -->
             <div class="inputBox">
-                <input type="text" name="user" id="user" required>
+                <input type="text" name="username" id="user" required>
                 <span>Username</span>
                 <i></i>
             </div>
             <div class="inputBox">
-                <input type="password" name="pass" id="pass" required>
+                <input type="password" name="password" id="pass" required>
                 <span>Contraseña</span>
                 <i></i>
             </div>
