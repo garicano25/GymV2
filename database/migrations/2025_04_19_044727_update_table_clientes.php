@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateTableTiempoMembresias extends Migration
+class UpdateTableClientes extends Migration
 {
     /**
      * Run the migrations.
@@ -13,10 +13,9 @@ class CreateTableTiempoMembresias extends Migration
      */
     public function up()
     {
-        Schema::create('tiempo_membresias', function (Blueprint $table) {
-            $table->id();
-            $table->string('tiempo');
-            $table->timestamps();
+        Schema::table('clientes', function (Blueprint $table) {
+
+            $table->foreignId('tipo_pago_id')->constrained('tipo_pago')->onDelete('cascade');
         });
     }
 
@@ -27,6 +26,6 @@ class CreateTableTiempoMembresias extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('tiempo_membresias');
+        //
     }
 }

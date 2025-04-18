@@ -29,40 +29,40 @@ $.getScript("/js/funciones.js").done(function () {
             );
         }
 
-        $("#tiempo_pago").on("change", function () {
-            TIEMPO = $(this).val();
+        $("#tiempo_membresia_id").on("change", function () {
+            const TIEMPO = $(this).find("option:selected").text();
 
             const currentDate = new Date();
             currentDate.setDate(currentDate.getDate() - 1);
             const futureDate = new Date();
 
             switch (TIEMPO) {
-                case "SEMANA":
+                case "Semana":
                     futureDate.setDate(futureDate.getDate() + 7);
                     break;
-                case "QUINCENA":
+                case "Quincena":
                     futureDate.setDate(futureDate.getDate() + 15);
                     break;
-                case "MES":
+                case "Mes":
                     // code block
                     futureDate.setMonth(futureDate.getMonth() + 1);
                     break;
-                case "BIMESTRE":
+                case "Bimestre":
                     // code block
                     futureDate.setMonth(futureDate.getMonth() + 2);
 
                     break;
-                case "TRIMESTRE":
+                case "Trimestre":
                     // code block
                     futureDate.setMonth(futureDate.getMonth() + 3);
 
                     break;
-                case "SEMESTRE":
+                case "Semestre":
                     // code block
                     futureDate.setMonth(futureDate.getMonth() + 6);
 
                     break;
-                case "ANUALIDAD":
+                case "Anualidad":
                     // code block
                     futureDate.setMonth(futureDate.getMonth() + 12);
 
@@ -79,12 +79,12 @@ $.getScript("/js/funciones.js").done(function () {
             const futureDateString = futureDate.toISOString().slice(0, 10);
 
             // Establecer los valores en los campos de entrada de tipo "date"
-            $("#inicio_mes").val(currentDateString);
-            $("#fin_mes").val(futureDateString);
+            $("#inicio_membresia").val(currentDateString);
+            $("#fin_membresia").val(futureDateString);
         });
 
         //Codigo para limitar la cantidad maxima que tendra dicho Input
-        $("#monto_pago").keypress(function (event) {
+        $("#monto").keypress(function (event) {
             if (
                 event.which < 48 ||
                 event.which > 57 ||
@@ -94,7 +94,7 @@ $.getScript("/js/funciones.js").done(function () {
             }
         });
 
-        $("#clave_acceso").keypress(function (event) {
+        $("#code_pin").keypress(function (event) {
             if (
                 event.which < 48 ||
                 event.which > 57 ||
@@ -105,92 +105,61 @@ $.getScript("/js/funciones.js").done(function () {
         });
 
         $("#generarClave").click(function () {
-            $("#clave_acceso").val(generarClave());
-            $("#textPin").text(generarClave());
+            clave = generarClave()
+
+            $("#code_pin").val(clave);
+            $("#textPin").text(clave);
         });
 
-        $("#guardar").click(function (e) {
+        $("#guardar").click(async function (e) {
             e.preventDefault();
 
-            formularioValido = validarFormulario($("#formUsuario"));
+            var isValid = validarFormulario($("#formUsuario"));
+            if (isValid) {
+                try {
+                    await sendFormPostCreateorUpdate(
+                        "store-client",
+                        "formUsuario",
+                        "guardar",
+                        1 //Crear
+                    );
 
-            // Si el formulario es válido, procede a realizar la acción (enviarlo en este caso)
-            if (formularioValido) {
-                alertMensajeConfirm(
-                    {
-                        title: "¿Deseas registrar este nuevo usuario?",
-                        text: "Se añadira un nuevo usuario",
-                        icon: "question",
-                    },
-                    function () {
-                        atendidoPor = "Personal Administrativo";
-                        clave_acceso = $("#clave_acceso").val();
-                        nombre_completo = $("#nombre_completo").val();
-                        inicio_mes = $("#inicio_mes").val();
-                        fin_mes = $("#fin_mes").val();
-                        monto_pago = $("#monto_pago").val();
-                        sexo = $("#sexo").val();
-                        tipo_pago = $("#tipo_pago").val();
-                        tiempo_pago = $("#tiempo_pago").val();
-                        correo = $("#correo").val();
+                    Swal.fire({
+                        icon: "success",
+                        title: "Usuario registrado con éxito",
+                        allowOutsideClick: true,
+                        allowEnterKey: true,
+                        timer: 4000,
+                        showConfirmButton: false, 
+                        timerProgressBar: true, 
+                        footer: `<h4>🖨️ Imprimiendo comprobante...</h4>`,
+                    });
 
-                        data = {
-                            api: 1,
-                            nombre_completo: nombre_completo,
-                            clave_acceso: clave_acceso,
-                            inicio_mes: inicio_mes,
-                            fin_mes: fin_mes,
-                            monto_pago: monto_pago,
-                            sexo: sexo,
-                            correo: correo,
-                            tipo_pago: tipo_pago,
-                            tiempo_pago: tiempo_pago,
-                        };
+                       
+                    $("#code_pin").val('');
+                    $("#textPin").text("");
+                    $("#formUsuario")[0].reset();
+                    
+                    
+                    //Imprimir comprobante
+                    
 
-                        ajax(
-                            data,
-                            "usuarios_api",
-                            { callbackAfter: true },
-                            false,
-                            function (data) {
-                                error = data["response"]["data"][0]["MSJ"];
-
-                                if (error) {
-                                    alertToast(`${error}`, "error", 4500);
-                                } else {
-                                    $("#formUsuario")[0].reset();
-
-                                    Swal.fire({
-                                        icon: "success",
-                                        title: "Usuario registrado con exito",
-                                        allowOutsideClick: false,
-                                        allowEnterKey: true,
-                                        footer: `<h1> Clave de acceso :  <b> ${clave_acceso} </b></h1>`,
-                                    });
-
-                                    //Mandamos a imprimir el ticket
-                                    ImprimirComprobante(
-                                        atendidoPor,
-                                        nombre_completo,
-                                        monto_pago,
-                                        inicio_mes,
-                                        fin_mes,
-                                        clave_acceso
-                                    );
-                                }
-                            }
-                        );
-                    },
-                    1
-                );
+                } catch (error) {
+                    Swal.fire({
+                        title: "Error!",
+                        text: "Error al intentar guardar el Cliente: " + error,
+                        icon: "error",
+                        timer: 3000,
+                        timerProgressBar: true,
+                    });
+                }
+                return false;
             } else {
-                // Muestra un mensaje de error o realiza alguna otra acción
-                alertToast(
-                    "Por favor, complete todos los campos del formulario.",
-                    "error",
-                    2000
-                );
+                toastEmptyFieldForm();
             }
+            return false;
+
+            
         });
     });
 });

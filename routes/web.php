@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\UserGymController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ClienteController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -37,11 +38,14 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/user-active', [UserGymController::class, 'userActive']);
     Route::post('/user-delete', [UserGymController::class, 'deleteUser']);
 
+    // ==================== Clientes 
+    Route::get('/create-client', [ClienteController::class, 'index'])->name('create-client');
+    Route::post('/store-client', [ClienteController::class, 'store']);
+
 
 
     // =================== Aditional
     Route::get('/list-client', function () {return view('pages.cliente.list'); });
-    Route::get('/create-client', function () {return view('pages.cliente.create'); });
     Route::get('/product', function () {return view('pages.producto.index'); });
     Route::get('/asistencia-pin', function () {return view('pages.asistencia.auth-pin'); });
     Route::get('/hub-ventas', function () {return view('pages.registroHub.ventas'); });

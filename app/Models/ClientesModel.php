@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Cliente extends Model
+class ClientesModel extends Model
 {
     use HasFactory;
 
@@ -20,6 +20,7 @@ class Cliente extends Model
         'monto',
         'gym_id',
         'tiempo_membresia_id',
+        'tipo_pago_id',
         'inicio_membresia',
         'fin_membresia',
         'status_id',
