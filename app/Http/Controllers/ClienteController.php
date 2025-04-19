@@ -32,7 +32,7 @@ class ClienteController extends Controller
                         $cliente = ClientesModel::create($request->all());
                     }else{
 
-                        return response()->json('Ya existe un cliente con la clave: '.$request->code_pin. ', por favor elija otra', 500);
+                        return response()->json(['error' => 'Ya existe un cliente con la clave: '.$request->code_pin. ', por favor elija otra'], 500);
                     }
                     break;
                 //API DE ACTUALIZACION
@@ -41,7 +41,7 @@ class ClienteController extends Controller
                     if ($cliente) {
                         $cliente->update($request->all());
                     } else {
-                        return response()->json('Cliente no encontrado', 404);
+                        return response()->json([ 'error' => 'Cliente no encontrado'], 404);
                     }
 
                     break;
@@ -53,13 +53,13 @@ class ClienteController extends Controller
                 default:
                     return response()->json([
                         'success' => false,
-                        'message' => 'API no encontrada'
+                        'error' => 'API no encontrada'
                     ], 422);
             }
 
             return response()->json($cliente, 200);
         } catch (\Exception $e) {
-            return response()->json('Error:'  . $e, 500);
+            return response()->json(['error' => $e], 500);
         }
     }
 }

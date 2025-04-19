@@ -40,20 +40,20 @@ $.getScript("/js/funciones.js").done(function () {
             ],
             ajax: {
                 dataType: "json",
-                data: { api: 2 },
-                method: "POST",
-                url: `${http}${servidor}/${appname}/api/productos_api.php`,
+                data: {},
+                method: "GET",
+                url: `/getProducts`,
                 beforeSend: function () {},
                 complete: function () {
                     TablaProductos.columns.adjust().draw();
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
-                    alertErrorAJAX(jqXHR, textStatus, errorThrown);
+                    console.log(jqXHR, textStatus, errorThrown);
                 },
-                dataSrc: "response.data",
+                dataSrc: "",
             },
             createdRow: function (row, data, dataIndex) {
-                if (data.ACTIVO == 0) {
+                if (data.status_id == 2) {
                     $(row).css({
                         // "font-style" : "italic",
                         color: "#888",
@@ -62,7 +62,7 @@ $.getScript("/js/funciones.js").done(function () {
                         opacity: "0.8",
                         "text-decoration": "line-through",
                     });
-                } else if (data.PRODUCTOS_TOTALES == 0) {
+                } else if (data.cantidad == 0) {
                     $(row).css({
                         "background-color": "#FFCCCC",
                         border: "1px solid #FF0000",
@@ -72,34 +72,24 @@ $.getScript("/js/funciones.js").done(function () {
                 }
             },
             columns: [
-                { data: "COUNT" },
-                { data: "NOMBRE" },
-                { data: "PRECIO" },
-                { data: "PRODUCTOS_TOTALES" },
-                { data: "ID_PRODUCTO" },
+                { data: "id" },
+                { data: "nombre" },
+                { data: "precio" },
+                { data: "cantidad" },
+                { data: "clave" },
                 {
                     data: null,
                     render: function (meta, data) {
-                        let html = "";
-                        if (meta.ACTIVO == 1) {
-                            html += `<div class = "estatusUsuariosTabla">`;
-                            html += `
-                        
-                            <button id="btnBloquear" class="btn btn-sm btn-info" title="Desactivar" onclick="BloquearProducto(${meta.ID_PRODUCTO})"><i class='bx bx-lock-alt'></i></button>
-
-                            <button class="btn btn-sm btn-warning" data-bs-target="#modalEditarProducto" data-bs-toggle="modal" title="Editar" onclick="ObtenerProducto(${meta.ID_PRODUCTO})"><i class='bx bx-edit-alt'></i></button>
-
-                            <button id="btnEliminar" class="btn btn-sm btn-danger" title="Eliminar" onclick="EliminarProducto(${meta.ID_PRODUCTO})" ><i class='bx bx-trash'></i></button>
-
-                        
-                        `;
+                        if (meta.status_id === 1) {
+                            texto = "Desactivar";
                         } else {
-                            html += `<div class = "estatusUsuariosTabla">`;
-                            html += `
-                            <button id="btnDesbloquear" class="btn btn-sm btn-success" title="Activar" onclick="DesbloquearProducto(${meta.ID_PRODUCTO})"><i class='bx bx-lock-open-alt'></i></button> `;
+                            texto = "Activar";
                         }
 
-                        html += "</div>";
+                        let html = `
+                        <button class="btn btn-sm btn-warning font-semibold rounded-lg editar" title="Editar"><i class='bx bxs-edit' ></i></i>  Editar</button>
+                        <button class="btn btn-sm btn-secondary font-semibold rounded-lg active" title="Desactivar"><i class='bx bx-power-off' ></i> ${texto}</button>
+                        <button class="btn btn-sm btn-danger font-semibold ml-5 rounded-lg eliminar" title="Eliminar"><i class='bx bx-trash'></i> Eliminar</button>`;
 
                         return html;
                     },
@@ -115,13 +105,225 @@ $.getScript("/js/funciones.js").done(function () {
             ],
         });
 
+        // =================== CRUD PRODUCTOS =====================
+
+        $("#btnCrearProducto").on("click", async function (event) {
+            event.preventDefault();
+
+            var isValid = validarFormulario($("#formProducto"));
+            if (isValid) {
+                try {
+                    await sendFormPostCreateorUpdate(
+                        "/store-product",
+                        "formProducto",
+                        "btnCrearProducto",
+                        1
+                    );
+                    actionsAfterSuccess(
+                        TablaProductos,
+                        "formProducto",
+                        "modalAgregarProducto",
+                        "btnCrearProducto"
+                    );
+                } catch (error) {
+                    Swal.fire({
+                        title: "Error!",
+                        text: "Error al intentar guardar el Producto: " + error,
+                        icon: "error",
+                        timer: 3000,
+                        timerProgressBar: true,
+                    });
+                }
+                return false;
+            } else {
+                toastEmptyFieldForm();
+            }
+            return false;
+        });
+
+        //Editar Producto
+        $("#TablaProductos tbody").on("click", "td>button.editar", function () {
+            var tr = $(this).closest("tr");
+            var row = TablaProductos.row(tr);
+
+            $("#nombreProducto").text(row.data().nombre);
+
+            editDatoTabla(row.data(), "editarProducto", "modalEditarProducto");
+            $("#productos_cantidad").val(row.data().cantidad);
+
+            Toast.fire({
+                icon: "success",
+                title: "Datos consultados correctamente!",
+                timer: 2000,
+            });
+
+            $("#modalEditarProducto").modal("show");
+        });
+
+        $("#btnEditar").on("click", async function (event) {
+            event.preventDefault();
+
+            var isValid = validarFormulario($("#editarProducto"));
+            if (isValid) {
+                try {
+                    await sendFormPostCreateorUpdate(
+                        "/store-product",
+                        "editarProducto",
+                        "btnCrearProducto",
+                        2
+                    );
+                    actionsAfterSuccess(
+                        TablaProductos,
+                        "editarProducto",
+                        "modalEditarProducto",
+                        "btnCrearProducto"
+                    );
+                } catch (error) {
+                    Swal.fire({
+                        title: "Error!",
+                        text: "Error al intentar guardar el Producto: " + error,
+                        icon: "error",
+                        timer: 3000,
+                        timerProgressBar: true,
+                    });
+                }
+                return false;
+            } else {
+                toastEmptyFieldForm();
+            }
+            return false;
+        });
+
+        //Activar Producto
+        $("#TablaProductos tbody").on("click", "td>button.active", function () {
+            var tr = $(this).closest("tr");
+            var row = TablaProductos.row(tr);
+
+            var activo = row.data().status_id == 1 ? "Inactivar" : "Activar";
+
+            Swal.fire({
+                title: `Decea ${activo} al producto ${row.data().nombre}?`,
+                text: "Nota: Si se Inactiva al producto no sera utilizado!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: `Si, ${activo}!`,
+                cancelButtonText: "No, cancelar!",
+                reverseButtons: true,
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        dataType: "json",
+                        type: "POST",
+                        url: "/product-active",
+                        headers: {
+                            "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr(
+                                "content"
+                            ),
+                        },
+                        data: {
+                            id: row.data().id,
+                            estado: row.data().status_id,
+                        },
+                        beforeSend: function () {},
+                        success: function () {
+                            // message
+                            Toast.fire({
+                                icon: "success",
+                                title: "Producto actualizado con exito!",
+                                timer: 2000,
+                            });
+
+                            TablaProductos.ajax.reload();
+                        },
+                        error: function () {
+                            Swal.fire({
+                                title: "Error!",
+                                text: "Error al intentar actualizar el estado del producto, intentelo nuevamente!",
+                                icon: "error",
+                                timer: 2500,
+                                timerProgressBar: true,
+                            });
+                            return false;
+                        },
+                    });
+                    return false;
+                } else if (
+                    /* Read more about handling dismissals below */
+                    result.dismiss === Swal.DismissReason.cancel
+                ) {
+                    Swal.fire({
+                        title: "Cancelado",
+                        text: "Accion cancelada!",
+                        timer: 1500,
+                        icon: "error",
+                    });
+                }
+            });
+        });
+
+        //Eliminar User
+        $("#TablaProductos tbody").on("click","td>button.eliminar",
+            function () {
+                var tr = $(this).closest("tr");
+                var row = TablaProductos.row(tr);
+
+                Swal.fire({
+                    title: `Decea eliminar al producto ${row.data().nombre}?`,
+                    text: "Esta acción es irreversible!",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: `Si, eliminar!`,
+                    cancelButtonText: "No, cancelar!",
+                    reverseButtons: true,
+                }).then(async (result) => {
+                    if (result.isConfirmed) {
+                        try {
+                            await sendFormPostDelete(
+                                "/store-product",
+                                -1,
+                                row.data().id
+                            );
+                            TablaProductos.ajax.reload();
+                            Swal.fire({
+                                title: "Exito!",
+                                text: "Registro eliminado con exito!",
+                                icon: "success",
+                                timer: 2500,
+                                timerProgressBar: true,
+                            });
+                        } catch (error) {
+                            Swal.fire({
+                                title: "Error!",
+                                text:"Error al intentar eliminar el Producto intentelo de nuevo! " + error,
+                                icon: "error",
+                                timer: 3000,
+                                timerProgressBar: true,
+                            });
+                        }
+                        return false;
+                    } else if (
+                        /* Read more about handling dismissals below */
+                        result.dismiss === Swal.DismissReason.cancel
+                    ) {
+                        Swal.fire({
+                            title: "Cancelado",
+                            text: "Accion cancelada!",
+                            timer: 1500,
+                            icon: "error",
+                        });
+                    }
+                });
+            }
+        );
+
+        // ====================================== FUNCIONES ADICIONALES PARA INPUT Y MODAL =============================
         $("#generarClave").click(function (e) {
             e.preventDefault();
             $("#clave_producto").val(generarClave());
         });
 
         //Codigo para limitar la cantidad maxima que tendra dicho Input
-        $("#monto_pago").keypress(function (event) {
+        $("#precio").keypress(function (event) {
             if (
                 event.which < 48 ||
                 event.which > 57 ||
@@ -131,7 +333,7 @@ $.getScript("/js/funciones.js").done(function () {
             }
         });
 
-        $("#clave_acceso").keypress(function (event) {
+        $("#clave_producto").keypress(function (event) {
             if (
                 event.which < 48 ||
                 event.which > 57 ||
@@ -141,64 +343,6 @@ $.getScript("/js/funciones.js").done(function () {
             }
         });
 
-        $("#btnCrearProducto").on("click", function (event) {
-            event.preventDefault();
-
-            formularioValido = validarFormulario($("#formProducto"));
-
-            // Si el formulario es válido, procede a realizar la acción (enviarlo en este caso)
-            if (formularioValido) {
-                alertMensajeConfirm(
-                    {
-                        title: "¿Esta seguro de guardar este producto?",
-                        text: `Es necesario confirmar para realizar esta acción`,
-                        icon: "question",
-                    },
-                    function () {
-                        data = {
-                            api: 1,
-                            nombre_producto: $("#nombre_producto").val(),
-                            precio_producto: $("#precio_producto").val(),
-                            productos_totales: $("#productos_totales_g").val(),
-                            clave_producto: $("#clave_producto").val(),
-                        };
-
-                        ajax(
-                            data,
-                            "productos_api",
-                            { callbackAfter: true },
-                            false,
-                            function (data) {
-                                error = data["response"]["data"][0]["MSJ"];
-
-                                if (error) {
-                                    alertToast(`${error}`, "error", 4500);
-                                } else {
-                                    TablaProductos.ajax.reload();
-                                    $("#formProducto")[0].reset();
-                                    $("#modalAgregarProducto").modal("hide");
-                                    alertToast(
-                                        "Producto guardado con éxito",
-                                        "success",
-                                        4000
-                                    );
-                                }
-                            }
-                        );
-                    },
-                    1
-                );
-            } else {
-                // Muestra un mensaje de error o realiza alguna otra acción
-                alertToast(
-                    "Por favor, complete todos los campos del formulario.",
-                    "error",
-                    2000
-                );
-            }
-        });
-
-        //CREAMOS UN EVENTO CUANDO EL MODAL SE CIERRA
         const myModalEl = document.getElementById("modalEditarProducto");
         myModalEl.addEventListener("hidden.bs.modal", (event) => {
             $("#editarProducto")[0].reset();
@@ -212,193 +356,11 @@ $.getScript("/js/funciones.js").done(function () {
         });
 
         //NO PERMITIMOS EL INGRESO DE NUMEROS NEGATIVOS PARA EL MODAL DE EDITAR
-        $("#costo").on("input", function () {
-            var valor = $(this).val().replace(/-/g, "");
-            $(this).val(valor);
-        });
-
-        $("#productos_agregados").on("input", function () {
-            var valor = $(this).val().replace(/-/g, "");
-            $(this).val(valor);
-        });
-
-        //NO PERMITIMOS EL INGRESO DE NUMEROS NEGATIVOS PARA EL MODAL DE AGREGAR
-        $("#precio_producto").on("input", function () {
-            var valor = $(this).val().replace(/-/g, "");
-            $(this).val(valor);
-        });
-
-        $("#productos_totales_g").on("input", function () {
+        $(".negativo").on("input", function () {
             var valor = $(this).val().replace(/-/g, "");
             $(this).val(valor);
         });
     });
 });
 
-function EliminarProducto(id_producto) {
-    alertMensajeConfirm(
-        {
-            title: "¿Esta seguro de eliminar este producto?",
-            text: `Ya no podra usar este producto`,
-            icon: "warning",
-        },
-        function () {
-            data = {
-                api: 3,
-                id_producto: id_producto,
-            };
 
-            ajax(
-                data,
-                "productos_api",
-                { callbackAfter: true },
-                false,
-                function (data) {
-                    TablaProductos.ajax.reload();
-                    alertToast("Producto eliminado con éxito", "success", 4000);
-                }
-            );
-        },
-        1
-    );
-}
-
-function BloquearProducto(id_producto) {
-    alertMensajeConfirm(
-        {
-            title: "¿Esta seguro de desactivar este producto?",
-            text: `Al desactivar este producto no podra registrar una venta`,
-            icon: "question",
-        },
-        function () {
-            data = {
-                api: 3,
-                id_producto: id_producto,
-                activo: 0,
-            };
-
-            ajax(
-                data,
-                "productos_api",
-                { callbackAfter: true },
-                false,
-                function (data) {
-                    TablaProductos.ajax.reload();
-                    alertToast(
-                        "Producto desactivado con éxito",
-                        "success",
-                        4000
-                    );
-                }
-            );
-        },
-        1
-    );
-}
-
-function DesbloquearProducto(id_producto) {
-    alertMensajeConfirm(
-        {
-            title: "¿Esta seguro de activar este producto?",
-            text: `Al activar este producto, podra realizar todos las actividades existentes`,
-            icon: "question",
-        },
-        function () {
-            data = {
-                api: 3,
-                id_producto: id_producto,
-                activo: 1,
-            };
-
-            ajax(
-                data,
-                "productos_api",
-                { callbackAfter: true },
-                false,
-                function (data) {
-                    TablaProductos.ajax.reload();
-                    alertToast("Producto activado con éxito", "success", 4000);
-                }
-            );
-        },
-        1
-    );
-}
-
-function ObtenerProducto(id_producto) {
-    data = {
-        api: 2,
-        id_producto: id_producto,
-    };
-
-    ajax(
-        data,
-        "productos_api",
-        { callbackAfter: true },
-        false,
-        function (data) {
-            info = data["response"]["data"][0];
-            $("#nombreProducto").text(info["NOMBRE"]),
-                $("#nombre").val(info["NOMBRE"]),
-                $("#costo").val(info["COSTO"]),
-                $("#productos_totales").val(info["PRODUCTOS_TOTALES"]),
-                $("#id_producto").val(info["ID_PRODUCTO"]);
-        }
-    );
-}
-
-function ActualizarProducto() {
-    formularioValido = validarFormulario($("#editarProducto"));
-
-    // Si el formulario es válido, procede a realizar la acción (enviarlo en este caso)
-    if (formularioValido) {
-        alertMensajeConfirm(
-            {
-                title: "¿Esta seguro de editar este producto?",
-                text: `Es necesario confirmar para realizar esta acción`,
-                icon: "question",
-            },
-            function () {
-                data = {
-                    api: 4,
-                    id_producto: $("#id_producto").val(),
-                    nombre_producto: $("#nombre").val(),
-                    precio_producto: $("#costo").val(),
-                    productos_agregados: $("#productos_agregados").val(),
-                    productos_totales: $("#productos_totales").val(),
-                };
-
-                ajax(
-                    data,
-                    "productos_api",
-                    { callbackAfter: true },
-                    false,
-                    function (data) {
-                        error = data["response"]["data"][0]["MSJ"];
-
-                        if (error) {
-                            alertToast(`${error}`, "error", 4500);
-                        } else {
-                            TablaProductos.ajax.reload();
-                            $("#editarProducto")[0].reset();
-                            $("#modalEditarProducto").modal("hide");
-                            alertToast(
-                                "Productos editado con éxito",
-                                "success",
-                                4000
-                            );
-                        }
-                    }
-                );
-            },
-            1
-        );
-    } else {
-        // Muestra un mensaje de error o realiza alguna otra acción
-        alertToast(
-            "Por favor, complete todos los campos del formulario.",
-            "error",
-            2000
-        );
-    }
-}

@@ -35,19 +35,20 @@
             </div>
             <div class="modal-body">
                 <form id="formProducto">
+                    {{ csrf_field() }}
                     <span><i style="color: red;">*</i> Nombre del producto:</span><b><span class="m-0" style="color: red;"></span></b>
-                    <input type="text" class="form-control" id="nombre_producto" name="nombre_producto" required>
+                    <input type="text" class="form-control" name="nombre" required>
                     <br>
                     <span><i style="color: red;">*</i>Precio unitario:</span><b><span class="m-0" style="color: red;"></span></b>
-                    <input type="number" class="form-control" id="precio_producto" name="precio_producto" placeholder="$ 00.00" min="0" required>
+                    <input type="number" class="form-control negativo" name="precio" placeholder="$ 00.00" min="0" required>
                     <br>
                     <span><i style="color: red;">*</i>Productos totales:</span><b><span class="m-0" style="color: red;"></span></b>
-                    <input type="number" class="form-control" id="productos_totales_g" name="productos_totales" min="0" required>
+                    <input type="number" class="form-control negativo" name="cantidad" min="0" required>
                     <br>
                     <div class="row">
                         <span><i style="color: red;">*</i>Clave del producto</span>
                         <div class="col-9">
-                            <input type="number" class="form-control mb-4 mt-2" placeholder="Esta clave te servira para agregar el producta a tus registros de ventas" name="clave_producto" id="clave_producto" readonly required>
+                            <input type="number" class="form-control mb-4 mt-2" placeholder="Esta clave te servira para agregar el producta a tus registros de ventas" name="clave" id="clave_producto" readonly required>
                         </div>
                         <div class="col-3">
                             <button class="btn btn-outline-danger mt-2" id="generarClave" type="button">Generar clave</button>
@@ -58,6 +59,43 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancelar</button>
                 <button class="btn btn-success" id="btnCrearProducto" type="button">Añadir producto</button>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- Modal: Editar Producto -->
+<div class="modal fade " id="modalEditarProducto" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content p-3">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Edicion del producto : <span id="nombreProducto"></span><i class='bx bx-purchase-tag-alt bx-fw'></i></h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editarProducto">
+                    {{ csrf_field() }}
+                    <input type="hidden" id="id" name="id">
+                    <span>Nombre del producto:</span>
+                    <input type="text" class="form-control" id="nombre" name="nombre" required>
+                    <br>
+                    <span>Precio unitario:</span>
+                    <input type="number" class="form-control negativo" id="precio" name="precio" min="0" required>
+                    <br>
+                    <span>Productos agregados:</span>
+                    <input type="number" class="form-control negativo" id="productos_agregados" name="productos_agregados" value="0" min="0" required>
+                    <br>
+                    <span>Productos existentes:</span>
+                    <input type="number" class="form-control negativo" id="productos_cantidad" name="productos_cantidad" readonly>
+                    <br>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancelar</button>
+                <button class="btn btn-success" id="btnEditar">Guardar cambios</button>
 
             </div>
         </div>

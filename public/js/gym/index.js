@@ -147,7 +147,7 @@ $.getScript("/js/funciones.js").done(function () {
         
         
         
-        //Eliminar User
+        //Activar User
         $("#TablaUsuarios tbody").on("click", "td>button.active", function () {
             var tr = $(this).closest("tr");
             var row = TablaUsuarios.row(tr);

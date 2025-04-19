@@ -3,6 +3,7 @@
 use App\Http\Controllers\UserGymController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ClienteController;
+use App\Http\Controllers\ProductController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -41,12 +42,18 @@ Route::middleware(['auth'])->group(function () {
     // ==================== Clientes 
     Route::get('/create-client', [ClienteController::class, 'index'])->name('create-client');
     Route::post('/store-client', [ClienteController::class, 'store']);
+    
+    
+    // =================== Productos
+    Route::get('/product', [ProductController::class, 'index'])->name('product');
+    Route::get('/getProducts', [ProductController::class, 'getProducts']);
+    Route::post('/store-product', [ProductController::class, 'store']);
+    Route::post('/product-active', [ProductController::class, 'productActive']);
 
 
 
     // =================== Aditional
     Route::get('/list-client', function () {return view('pages.cliente.list'); });
-    Route::get('/product', function () {return view('pages.producto.index'); });
     Route::get('/asistencia-pin', function () {return view('pages.asistencia.auth-pin'); });
     Route::get('/hub-ventas', function () {return view('pages.registroHub.ventas'); });
     Route::get('/hub-pagos', function () {return view('pages.registroHub.pagos'); });

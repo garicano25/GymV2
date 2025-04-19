@@ -279,9 +279,9 @@ function recuperarPagosSinConfirmar() {
             error: function (xhr) {
                 $("#" + onlyIdButton).prop("disabled", false);
 
-                if (xhr.responseJSON) {
+                if (xhr.responseJSON.error) {
                     reject(
-                        xhr.responseJSON.message ||
+                        xhr.responseJSON.error ||
                             "Ocurrió un error inesperado."
                     );
                 } else {
