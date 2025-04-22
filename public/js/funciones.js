@@ -18,14 +18,38 @@ const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]
 const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
 
 
-function recuperarTotalVendido(dataRecibida, api_php, modulo) {
+function recuperarTotalVendido(dataRecibida, modulo) {
 
-    ajax(dataRecibida, api_php, { callbackAfter: true }, false, function (data) {
+     $.ajax({
+         dataType: "json",
+         type: "POST",
+         url: 'getTotalVentas',
+         headers: {
+             "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
+         },
+         data: dataRecibida,
+         success: function (response) {
+             $("#total_vendido").text("Total de " + modulo + " : " + response[0]['TOTAL']);
 
-        info = data['response']['data'][0]
-        $("#total_vendido").text("Total de "+ modulo + ' : ' + info['TOTAL']);
-
-    })
+         },
+         error: function () {
+             if (xhr.responseJSON) {
+                 Toast.fire({
+                     icon: "error",
+                     title:
+                         xhr.responseJSON.error ||
+                         "Ocurrió un error inesperado.",
+                     timer: 2000,
+                 });
+             } else {
+                 Toast.fire({
+                     icon: "error",
+                     title: "Error de conexión con el servidor. Intentelo mas tarde",
+                     timer: 2000,
+                 });
+             }
+         },
+     });
 }
 
 
@@ -285,9 +309,11 @@ function recuperarPagosSinConfirmar() {
                             "Ocurrió un error inesperado."
                     );
                 } else {
-                    alert(
-                        "Error de conexión con el servidor. Intentelo mas tarde"
-                    );
+                    Toast.fire({
+                        icon: "error",
+                        title: "Error de conexión con el servidor. Intentelo mas tarde",
+                        timer: 2000,
+                    });
                 }
             },
         });
@@ -321,9 +347,11 @@ function recuperarPagosSinConfirmar() {
                             "Ocurrió un error inesperado."
                     );
                 } else {
-                    alert(
-                        "Error de conexión con el servidor. Intentelo mas tarde"
-                    );
+                    Toast.fire({
+                        icon: "error",
+                        title: "Error de conexión con el servidor. Intentelo mas tarde",
+                        timer: 2000,
+                    });
                 }
             },
         });

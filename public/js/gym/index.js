@@ -170,9 +170,7 @@ $.getScript("/js/funciones.js").done(function () {
                             type: "POST",
                             url: "/user-active",
                             headers: {
-                                "X-CSRF-TOKEN": $(
-                                    'meta[name="csrf-token"]'
-                                ).attr("content"),
+                                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
                             },
                             data: {
                                 id: row.data().id,

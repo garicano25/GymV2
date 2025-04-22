@@ -1,12 +1,12 @@
 $.getScript("/js/funciones.js").done(function () {
     $(function () {
+
         fechon = $("#fechaRegistroVentas").val(fechaActualFormatoInput);
         $("#fechaActual").text(obtenerFechaActualTexto());
 
-        // console.log(fechon)
 
         dataRegistroVentas = {
-            api: 2,
+            all: 0,
             fechaRegistroVentas: $("#fechaRegistroVentas").val(),
         };
 
@@ -53,13 +53,18 @@ $.getScript("/js/funciones.js").done(function () {
                 data: function (d) {
                     return $.extend(d, dataRegistroVentas);
                 },
+                headers: {
+                    "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr(
+                        "content"
+                    ),
+                },
                 method: "POST",
-                url: `${http}${servidor}/${appname}/api/ventas_api.php`,
+                url: `getVentas`,
                 beforeSend: function () {
                     Toast.fire({
                         icon: "info",
                         title: "Estamos cargando tu solicitud, esto puede demorar un rato",
-                        timer: 3000,
+                        timer: 1500,
                         // width: 'auto'
                     });
                 },
@@ -67,27 +72,69 @@ $.getScript("/js/funciones.js").done(function () {
                     TablaVentas.columns.adjust().draw();
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
-                    alertErrorAJAX(jqXHR, textStatus, errorThrown);
+                    console.log(jqXHR, textStatus, errorThrown);
                 },
-                dataSrc: "response.data",
+                dataSrc: {},
             },
             columns: [
-                { data: "COUNT" },
-                { data: "NOMBRE" },
-                { data: "COSTO" },
-                { data: "CANTIDA" },
+                { data: "PRODUCTO" },
+                { data: "PRECIO" },
+                { data: "CANTIDAD" },
                 { data: "TOTAL" },
-                { data: "FECHA_HORA_VENTA" },
+                { data: "FECHA" },
             ],
             columnDefs: [
-                { target: 0, title: "#", className: "all" },
-                { target: 1, title: "Producto", className: "all" },
-                { target: 2, title: "Precio", className: "all" },
-                { target: 3, title: "Cantidad vendida", className: "all" },
-                { target: 4, title: "Total de la venta", className: "all" },
-                { target: 5, title: "Fecha", className: "all" },
+                { target: 0, title: "Producto", className: "all text-center" },
+                { target: 1, title: "Precio", className: "all text-center" },
+                { target: 2, title: "Cantidad vendida", className: "all text-center" },
+                { target: 3, title: "Total de la venta", className: "all text-center" },
+                { target: 4, title: "Fecha", className: "all text-center" },
             ],
         });
+
+        //Guardar venta
+        $("#btnRegistrarVenta").on("click", async function (e) {
+            e.preventDefault();
+
+            
+            var isValid = validarFormulario($("#formVenta"));
+            if (isValid) {
+                try {
+                    await sendFormPostCreateorUpdate(
+                        "/saveSell",
+                        "formVenta",
+                        "btnRegistrarVenta"
+                    );
+
+                    $("#formVenta")[0].reset();
+                    Toast.fire({    
+                        icon: "success",
+                        title: "Venta registrada con exito",
+                        timer: 2000,
+                    });
+
+                } catch (error) {
+                    Swal.fire({
+                        title: "Error!",
+                        text: "Error al intentar registrar la venta: " + error,
+                        icon: "error",
+                        timer: 3000,
+                        timerProgressBar: true,
+                    });
+                }
+                return false;
+            } else {
+                toastEmptyFieldForm();
+            }
+            return false;
+            
+        });
+
+
+
+
+
+        // ===================================== FUNCIONES ADICIONALE =========================================
 
         //Codigo para limitar la cantidad maxima que tendra dicho Input
         $("#clave_producto").keypress(function (event) {
@@ -110,20 +157,7 @@ $.getScript("/js/funciones.js").done(function () {
             }
         });
 
-        //Activamos o desactivamos el boton de enviar
-        // $('#clave_registro').on('input keyup', function () {
 
-        //     var inputValue = $(this).val();
-        //     inputValue = inputValue.replace(/\s+/g, '').replace(/^0*/, '');
-
-        //     if (inputValue.length === 4) {
-
-        //         $('#registrar').prop('disabled', false);
-        //     } else {
-        //         $('#registrar').prop('disabled', true);
-        //     }
-
-        // });
         $("#fechaRegistroVentas").change(function () {
             recargarTablaVentas();
         });
@@ -139,106 +173,33 @@ $.getScript("/js/funciones.js").done(function () {
         });
 
         function recargarTablaVentas(fecha = 1, fecha2 = 1) {
-            dataRegistroVentas = {
-                api: 2,
-            };
+            
+            if (fecha === 1 && fecha2 === 1) {
+                dataRegistroVentas = { all: 0 };
+                dataTotalVendido = {all: 0,};
+                
+            } else {
+                
+                dataRegistroVentas = { all: 1 };
+                dataTotalVendido = { all: 1 };
+                                
+            }
 
-            dataTotalVendido = {
-                api: 3,
-            };
+            if (fecha) dataRegistroVentas["fechaRegistroVentas"] = $("#fechaRegistroVentas").val();
+            if (fecha2) dataTotalVendido["fechaRegistroVentas"] = $("#fechaRegistroVentas").val();
 
-            if (fecha)
-                dataRegistroVentas["fechaRegistroVentas"] = $(
-                    "#fechaRegistroVentas"
-                ).val();
-            if (fecha2)
-                dataTotalVendido["fechaRegistroVentas"] = $(
-                    "#fechaRegistroVentas"
-                ).val();
-
-            recuperarTotalVendido(dataTotalVendido, "ventas_api", "ventas");
+            recuperarTotalVendido(dataTotalVendido, "ventas");
 
             TablaVentas.ajax.reload();
         }
 
         dataTotalVendido = {
-            api: 3,
+            all: 0,
             fechaRegistroVentas: $("#fechaRegistroVentas").val(),
         };
-        recuperarTotalVendido(dataTotalVendido, "ventas_api", "ventas");
 
-        $("#btnRegistrarVenta").on("click", function (e) {
-            e.preventDefault();
+        recuperarTotalVendido(dataTotalVendido, "ventas");
 
-            formularioValido = validarFormulario($("#formVenta"));
-
-            // Si el formulario es válido, procede a realizar la acción (enviarlo en este caso)
-            if (formularioValido) {
-                alertMensajeConfirm(
-                    {
-                        title: "¿Esta seguro de registrar esta venta?",
-                        text: "Se añadira al registro diario de ventas",
-                        icon: "question",
-                    },
-                    function () {
-                        data = {
-                            api: 1,
-                            clave_producto: $("#clave_producto").val(),
-                            cantidad_productos: $("#cantidad_productos").val(),
-                        };
-
-                        ajax(
-                            data,
-                            "ventas_api",
-                            { callbackAfter: true },
-                            false,
-                            function (data) {
-                                error = data["response"]["data"][0]["MSJ"];
-
-                                if (error) {
-                                    Swal.fire({
-                                        icon: "error",
-                                        title: "Oops...",
-                                        text: "Hubo un problema!",
-                                        footer: error,
-                                        timer: 5000,
-                                        timerProgressBar: true,
-                                    });
-                                } else {
-                                    $("#formVenta")[0].reset();
-                                    TablaVentas.ajax.reload();
-
-                                    dataTotalVendido = {
-                                        api: 3,
-                                        fechaRegistroVentas: $(
-                                            "#fechaRegistroVentas"
-                                        ).val(),
-                                    };
-
-                                    recuperarTotalVendido(
-                                        dataTotalVendido,
-                                        "ventas_api",
-                                        "ventas"
-                                    );
-                                    alertToast(
-                                        "Venta registradada",
-                                        "success",
-                                        4000
-                                    );
-                                }
-                            }
-                        );
-                    },
-                    1
-                );
-            } else {
-                // Muestra un mensaje de error o realiza alguna otra acción
-                alertToast(
-                    "Por favor, complete todos los campos del formulario.",
-                    "error",
-                    2000
-                );
-            }
-        });
+       
     });
 });

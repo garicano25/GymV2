@@ -4,21 +4,21 @@
 
 <!-- Start: Tablas -->
 
-<form id="formVenta">
+<form id="formVenta" method="post">
     <div class="row mb-2 mt-2">
         <div class="col-8">
             <h2 class="mt-4 text-center"><i class='bx bxs-store bx-fw'></i>Registro de ventas<span id="fechaActual"></span></h2>
-            <div class="row mt-2">
-                <div class="col-6">
-                    <span><i style="color: red;">*</i>Clave del producto</span>
-                    <input type="number" name="clave_producto" id="clave_producto" placeholder="Ingrese la clave del producto" class="form-control mt-1 mb-4 clave" autofocus required min="1">
+                {{ csrf_field() }}
+                <div class="row mt-2">
+                    <div class="col-6">
+                        <span><i style="color: red;">*</i>Clave del producto</span>
+                        <input type="number" name="clave" id="clave_producto" placeholder="Ingrese la clave del producto" class="form-control mt-1 mb-4 clave" autofocus required min="1">
+                    </div>
+                    <div class="col-6">
+                        <span><i style="color: red;">*</i>Productos vendidos</span>
+                        <input type="number" name="cantidad" id="cantidad_productos" placeholder="Productos vendidos" class="form-control mt-1 mb-4 clave" required min="1" value="1">
+                    </div>
                 </div>
-                <div class="col-6">
-                    <span><i style="color: red;">*</i>Productos vendidos</span>
-                    <input type="number" name="cantidad_productos" id="cantidad_productos" placeholder="Productos vendidos" class="form-control mt-1 mb-4 clave" required min="1" value="1">
-                </div>
-            </div>
-
             <button class="btn btn-success w-50 p-2 d-flex mx-auto text-lg-end justify-content-center btnGuardar " id="btnRegistrarVenta">Registar venta</button>
         </div>
         <div class="col-4">
