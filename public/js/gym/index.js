@@ -245,7 +245,7 @@ $.getScript("/js/funciones.js").done(function () {
                         Swal.fire({
                             title: "Error!",
                             text:
-                                "Error al intentar eliminar el Trabajador intentelo de nuevo! " +
+                                "Error al intentar eliminar el Gym intentelo de nuevo! " +
                                 error,
                             icon: "error",
                             timer: 3000,

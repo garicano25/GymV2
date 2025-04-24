@@ -3,6 +3,7 @@
 use App\Http\Controllers\UserGymController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ClienteController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\HubsController;
 use App\Http\Controllers\ProductController;
 use Illuminate\Support\Facades\Route;
@@ -30,7 +31,7 @@ Route::post('/loginAuth', [AuthController::class, 'loginAuth'])->name('loginAuth
 Route::middleware(['auth'])->group(function () {
 
     // ===================== Home
-    Route::get('/', function () {return view('pages.home.index');})->name('home');
+    Route::get('/', [HomeController::class, 'index'])->name('home');
 
 
     // ===================== Usuarios (Gym)
@@ -39,6 +40,12 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/register-user', [AuthController::class, 'register']);
     Route::post('/user-active', [UserGymController::class, 'userActive']);
     Route::post('/user-delete', [UserGymController::class, 'deleteUser']);
+    
+    Route::get('/gym-views', [UserGymController::class, 'views'])->name('gym-views');
+    Route::post('/store-view', [UserGymController::class, 'store']);
+    Route::get('/getView', [UserGymController::class, 'getView']);
+    Route::get('/getGymViews', [UserGymController::class, 'getGymViews']);
+    Route::post('/viewActive', [UserGymController::class, 'viewActive']);
 
     // ==================== Clientes 
     Route::get('/create-client', [ClienteController::class, 'index'])->name('create-client');
